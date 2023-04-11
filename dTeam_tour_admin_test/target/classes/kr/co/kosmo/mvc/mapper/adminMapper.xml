@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin">
+
+	<insert id="addadmin" parameterType="adminvo">
+		Insert Into admin_semi
+		Values(admin_semi_seq.nextVal,
+		#{maid},#{mapwd},#{maphone},#{maemail},sysdate)
+	</insert>
+
+	<!-- login mapper -->
+	<select id="login" parameterType="adminvo" resultType="adminvo">
+		select
+		maid,mapwd
+		from admin_semi where maid=#{maid} and mapwd=#{mapwd}
+	</select>
+
+	<!-- idCheck -->
+	<select id="idchk" parameterType="String" resultType="int">
+		select
+		count(*) from admin_semi where maid=#{maid}
+	</select>
+
+	<!-- admin login loggin mapper -->
+	<select id="adlogin_in" parameterType="adlogvo">
+		insert into adminlog_semi
+		values(adminlog_semi_SEQ.nextVal,#{adlogid},#{adlogip},#{adlogagent},#{adlogstatus},sysdate)
+	</select>
+
+	<!-- mem json mapper -->
+	<select id="memjson" parameterType="String" resultType="memvo">
+		select
+		*
+		from member_semi where mid=#{mid}
+	</select>
+
+	<!-- mem json listmapper -->
+	<select id="memjsonlist" resultType="memvo">
+		select
+		mid,mname,mjumin,mphone,maddr,memail,mcall,mgrade,mpoint from
+		member_semi order by mnum
+	</select>
+
+	<!-- host json mapper -->
+	<select id="hostjson" parameterType="String" resultType="hvo">
+		select
+		*
+		from host_semi where hid=#{hid}
+	</select>
+
+	<!-- host json listmapper -->
+	<select id="hostjsonlist" resultType="hvo">
+		select
+		hnum,hid,hname,hphone,haddr,hemail,hcall,haccount,hdate from
+		host_semi
+		order by hnum
+	</select>
+
+	<!-- mem search & page -->
+	<select id="memtotalCount" resultType="int">
+		select count(*) from
+		member_semi
+	</select>
+
+	<!-- mem search & page -->
+	<select id="memlistpage" resultType="memvo"
+		parameterType="searchvo">
+		select mnum,
+		<if test="searchValue != null and searchType != null">
+			<choose>
+				<when test="searchType == 1">
+		     <![CDATA[ 
+		       replace(mid,#{searchValue},
+		      '<span style="color:orange; font-weight: bold;">${searchValue}</span>') mid,mname,
+		       ]]>
+				</when>
+				<when test="searchType == 2">
+		     <![CDATA[ 
+		      mid,replace(mname,#{searchValue},
+		      '<span style="color:pink; font-weight: bold;">${searchValue}</span>') mname,
+		       ]]>
+				</when>
+				<otherwise>
+					mid,mname,
+				</otherwise>
+			</choose>
+		</if>
+		mjumin,mphone,maddr,memail,mcall,mgrade,mpoint,mno,mdate
+		from(select
+		rownum r_num, a.* from(select * from
+		member_semi
+		<if test="searchValue != null and searchType != null">
+			<where>
+				<choose>
+					<when test="searchType == 1">
+						mid like '%'||#{searchValue}||'%'
+					</when>
+
+					<when test="searchType == 2">
+						mname like '%'||#{searchValue}||'%'
+					</when>
+				</choose>
+			</where>
+		</if>
+		order by mnum desc
+		)a
+		) where r_num between #{begin} and #{end}
+	</select>
+
+	<!-- host search & page -->
+	<select id="hototalCount" resultType="int">
+		select count(*) from
+		host_semi
+	</select>
+
+	<!-- host search & page -->
+	<select id="holistpage" resultType="hvo"
+		parameterType="searchvo">
+		select hno,
+		<if test="searchValue != null and searchType != null">
+			<choose>
+				<when test="searchType == 1">
+		     <![CDATA[ 
+		       replace(hid,#{searchValue},
+		      '<span style="color:orange; font-weight: bold;">${searchValue}</span>') hid,hname,
+		       ]]>
+				</when>
+				<when test="searchType == 2">
+		     <![CDATA[ 
+		      hid,replace(hname,#{searchValue},
+		      '<span style="color:pink; font-weight: bold;">${searchValue}</span>') hname,
+		       ]]>
+				</when>
+				<otherwise>
+					hid,hname,
+				</otherwise>
+			</choose>
+		</if>
+		hphone,haddr,hemail,hcall,haccount,hnum,hdate
+		from(select
+		rownum r_num,
+		a.* from(select * from
+		host_semi
+		<if test="searchValue != null and searchType != null">
+			<where>
+				<choose>
+					<when test="searchType == 1">
+						hid like '%'||#{searchValue}||'%'
+					</when>
+
+					<when test="searchType == 2">
+						hname like '%'||#{searchValue}||'%'
+					</when>
+				</choose>
+			</where>
+		</if>
+		order by hno desc
+		)a
+		) where r_num between #{begin} and #{end}
+	</select>
+
+	<insert id="addnotice" parameterType="nvo">
+		Insert Into notice_semi
+		Values(notice_semi_seq.nextVal,#{nsub},#{nwriter},#{ncontent},sysdate,#{macode})
+	</insert>
+
+	<select id="noticelist" resultType="nvo">
+		select * from notice_semi
+		order by 1 desc
+	</select>
+
+	<delete id="noticedel" parameterType="int">
+		delete from notice_semi
+		where
+		nnum=#{nnum}
+	</delete>
+
+	<select id="noticedetail" resultType="nvo" parameterType="int">
+		select
+		* from notice_semi where nnum=#{nnum} order by 1 desc
+	</select>
+
+	<update id="noticecmodify" parameterType="nvo">
+		update notice_semi
+		set
+		nsub=#{nsub},
+		ncontent=#{ncontent}
+		where nnum=#{nnum}
+	</update>
+
+	<!-- notice search & page -->
+	<select id="noticetotalCount" resultType="int">
+		select count(*) from
+		notice_semi
+	</select>
+
+	<!-- notice search & page -->
+	<select id="noticelistpage" resultType="nvo"
+		parameterType="searchvo">
+		select nnum,
+		<if test="searchValue != null and searchType != null">
+			<choose>
+				<when test="searchType == 1">
+		     <![CDATA[ 
+		       replace(nsub,#{searchValue},
+		      '<span style="color:orange; font-weight: bold;">${searchValue}</span>') nsub,nwriter,
+		       ]]>
+				</when>
+				<when test="searchType == 2">
+		     <![CDATA[ 
+		      nsub,replace(nwriter,#{searchValue},
+		      '<span style="color:pink; font-weight: bold;">${searchValue}</span>') nwriter,
+		       ]]>
+				</when>
+				<otherwise>
+					nsub,nwriter,
+				</otherwise>
+			</choose>
+		</if>
+		ncontent,ndate,macode
+		from(select
+		rownum r_num, a.* from(select * from
+		notice_semi
+		<if test="searchValue != null and searchType != null">
+			<where>
+				<choose>
+					<when test="searchType == 1">
+						nsub like '%'||#{searchValue}||'%'
+					</when>
+
+					<when test="searchType == 2">
+						nwriter like '%'||#{searchValue}||'%'
+					</when>
+				</choose>
+			</where>
+		</if>
+		order by nnum desc
+		)a
+		) where r_num between #{begin} and #{end}
+	</select>
+
+	<!-- 설문조사 문항 집어 넣기 -->
+	<insert id="addsurvey" parameterType="survo">
+		insert into survey
+		values(survey_seq.nextVal,#{sub},#{code},sysdate)
+	</insert>
+
+	<!-- 설문조사 문항에 딸린 선택지 집어 넣기 -->
+	<insert id="addcontent" parameterType="java.util.List">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select
+			survey_seq.currVal from dual
+		</selectKey>
+		<foreach collection="list" item="e" separator=" "
+			open="insert all" close="select * from dual">
+			into surveycontent
+			values(#{e.subtype},#{id},#{e.surveytitle},0)
+		</foreach>
+	</insert>
+
+	<!-- 설문조사 문항에 딸린 선택지들을 보는 디테일 -->
+	<resultMap type="survo" id="surview">
+		<id property="num" column="num" javaType="int" />
+		<result property="sub" column="sub" />
+		<result property="sdate" column="sdate" />
+		<collection property="subvey" javaType="java.util.List"
+			ofType="subvo">
+			<result property="subcode" column="subcode" javaType="int" />
+			<result property="subtype" column="subtype" />
+			<result property="surveytitle" column="surveytitle" />
+			<result property="surveycnt" column="surveycnt" javaType="int" />
+		</collection>
+	</resultMap>
+	<select id="surveyDetail" parameterType="int"
+		resultMap="surview">
+		select
+		s.num,s.sub,s.sdate,
+		sc.subtype,sc.subcode,sc.surveytitle,sc.surveycnt
+		from survey
+		s,surveycontent sc
+		where s.num=sc.subcode and s.num=#{num}
+	</select>
+
+	<!-- 설문조사 문항 컨텐츠 수정하기 -->
+	<update id="updateSurveyCnt" parameterType="subvo">
+		update surveycontent
+		set
+		surveycnt=surveycnt+1
+		where subcode=#{subcode} and
+		subtype=#{subtype}
+	</update>
+
+	<!-- 설문조사 문항과 문항에 딸린 선택지들을 보는 list 조인과 그룹 -->
+	<resultMap type="survo" id="surveylist">
+		<id property="num" column="num" javaType="int" />
+		<result property="sub" column="sub" />
+		<result property="code" column="code" />
+		<result property="sdate" column="sdate" />
+		<result property="surveytotal" column="total" />
+	</resultMap>
+	<select id="listSurvey" resultMap="surveylist">
+		select
+		s.num,s.sub,s.code,sum(sc.surveycnt) total,s.sdate
+		from survey s,
+		surveycontent sc where s.num=sc.subcode and s.sub is not
+		null
+		GROUP BY
+		s.num,s.sub,s.code,s.sdate
+		order by num DESC
+	</select>	
+
+
+	<!-- 설문조사 문항과 문항에 딸린 선택지들에 뭘 선택했는지 보는 것 -> 설문 했는지 안햇는지 중복처리 하는것 설문조사 레퍼런스(호감도) -->
+	<!-- 서버이 레퍼런스 연결 시키기(차트로 뽑기 -> ajax json??) -->
+	<select id="surveychk" parameterType="scvo" resultType="int">
+		select
+		count(*) from surveycheck where sccode=#{sccode} and scid=#{scid}
+	</select>
+	<!-- 클라이언트 용 설문조사 제출하기, 서베이체크 테이블에 로그 남기는용도, id=서베이 체크 와 한쌍 =>트랜잭션 처리 -->
+	<insert id="addsurveychk" parameterType="scvo">
+		insert into surveycheck
+		values(SURVEYCHECK_SEQ.nextval,#{sccode},#{scid},#{subtype})
+	</insert>
+
+
+	<!-- 성별 구하기 -> 설문조사 젠더 (성비 구하기) 성별 젠더와 연결 시키기(차트로 뽑기 -> ajax json??)-->
+	<select id="genderc" resultType="stvo" parameterType="int">
+		select
+		sum(decode(substr(mjumin,8,1),1,1,3,1)) msum,
+		sum(decode(substr(mjumin,8,1),2,1,4,1)) wsum from member_semi where
+		mid in(select scid from surveycheck where sccode=#{sccode})
+	</select>
+
+
+
+</mapper>

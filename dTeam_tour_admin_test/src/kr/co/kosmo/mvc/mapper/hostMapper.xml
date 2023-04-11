@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="host">
+
+	<insert id="addhost" parameterType="hvo">
+		Insert Into host_semi
+		Values(host_semi_seq.nextVal,#{hid},#{hpwd},#{hname},#{hphone},#{haddr},#{hemail},#{hcall},#{haccount},#{hno},sysdate)
+	</insert>
+
+	<!-- Login -->
+	<select id="login" parameterType="hvo" resultType="hvo">
+		select
+		mid,mname from host_semi where mid=#{mid} and mpwd=#{mpwd}
+	</select>
+</mapper>
